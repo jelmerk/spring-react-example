@@ -1,34 +1,19 @@
 package com.winterbe.react;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * @author Benjamin Winterberg
  */
+@AllArgsConstructor
 public class Comment {
+    @Getter
+    @Setter
     private String author;
+    @Getter
+    @Setter
     private String text;
-
-    public Comment() {
-
-    }
-
-    public Comment(String author, String text) {
-        this.author = author;
-        this.text = text;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
 }
+

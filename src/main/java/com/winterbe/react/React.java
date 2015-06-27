@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
+import java.util.Map;
 
 public class React {
 
@@ -40,5 +41,13 @@ public class React {
     private Reader read(String path) {
         InputStream in = getClass().getClassLoader().getResourceAsStream(path);
         return new InputStreamReader(in);
+    }
+
+    public String renderToString(String s, Map<String, Object> model) {
+        if (!s.equals("./commentbox.js")) {
+            throw new RuntimeException("View not found");
+        }
+        List<Comment> comments = (List<Comment>) model.get("comments");
+        return renderCommentBox(comments);
     }
 }
