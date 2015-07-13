@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +40,16 @@ public class MainController {
         mav.addObject("data", data);
         mav.addObject("comments", comments);
         mav.addObject("server", true);
+        return mav;
+    }
+
+    @RequestMapping("/helloworld")
+    public ModelAndView helloworld() throws Exception {
+
+        String name = "HiHI";
+        ModelAndView mav = new ModelAndView("helloworld");
+        mav.addObject("server", true);
+        mav.addObject("name", Arrays.asList(name));
         return mav;
     }
 }

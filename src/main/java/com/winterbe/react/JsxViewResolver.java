@@ -18,11 +18,13 @@ public class JsxViewResolver implements ViewResolver {
     @Setter String indexFile = "/templates/index.html";
 
     private React renderer;
+//    private NodeContentRenderer renderer;
     private MessageFormat format;
 
     @PostConstruct
     public void init() throws IOException {
         renderer = new React();
+//        renderer = new NodeContentRenderer();
         ClassPathResource res = new ClassPathResource(indexFile);
         String template = IOUtils.toString(res.getInputStream());
         format = new MessageFormat(template);
