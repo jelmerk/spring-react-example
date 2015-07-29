@@ -4,6 +4,8 @@ import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
 import com.eclipsesource.v8.utils.V8ObjectUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.IOException;
@@ -21,14 +23,17 @@ public class React2 {
 
     public static void main(String[] args) throws Exception {
 
+        ObjectMapper objectMapper = new ObjectMapper();
+
         V8 v8 = V8.createV8Runtime("global");
         v8.executeVoidScript(read("static/vendor/react.js"));
         v8.executeVoidScript(read("static/vendor/showdown.min.js"));
         v8.executeVoidScript(read("static/commentBox.js"));
 
-        Map<String, Object> comment1 = new HashMap<>();
-        comment1.put("author", "Sander");
-        comment1.put("text", "I like meetings");
+
+        Comment c = new Comment("Sander", "I like meetings");
+
+        Map<String,Object> comment1 = objectMapper.convertValue(c, Map.class);
 
         Map<String, Object> comment2 = new HashMap<>();
         comment2.put("author", "Maarten");
