@@ -9,7 +9,9 @@ import org.springframework.util.FileCopyUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -24,30 +26,25 @@ public class React2 {
         v8.executeVoidScript(read("static/vendor/showdown.min.js"));
         v8.executeVoidScript(read("static/commentBox.js"));
 
-        V8Object comment1 = new V8Object(v8)
-                .add("author", "Jelmer")
-                .add("text", "Just a test");
+        Map<String, Object> comment1 = new HashMap<>();
+        comment1.put("author", "Sander");
+        comment1.put("text", "I like meetings");
 
+        Map<String, Object> comment2 = new HashMap<>();
+        comment2.put("author", "Maarten");
+        comment2.put("text", "React rules");
 
-        Map<String, Object> commentMap = new HashMap<>();
-        commentMap.put("author", "Maarten");
-        commentMap.put("text", "react rules");
+        List<Map<String, Object>> comments = Arrays.asList(comment1, comment2);
 
+        V8Array commentsArray = V8ObjectUtils.toV8Array(v8, comments);
 
-        V8Object comment2 = V8ObjectUtils.toV8Object(v8, commentMap);
-
-        V8Array comments = new V8Array(v8).push(comment1).push(comment2);
-
-        V8Array parameters = new V8Array(v8).push(comments);
+        V8Array parameters = new V8Array(v8).push(commentsArray);
 
         String html = v8.executeStringFunction("renderServer", parameters);
 
         System.out.println(html);
 
-        comment1.release();
-        comment2.release();
-
-        comments.release();
+        commentsArray.release();
         parameters.release();
 
         v8.release(true);
