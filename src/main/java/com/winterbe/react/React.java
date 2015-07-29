@@ -1,44 +1,72 @@
 package com.winterbe.react;
 
-import jdk.nashorn.api.scripting.NashornScriptEngine;
 
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
+import com.eclipsesource.v8.V8;
+import com.eclipsesource.v8.V8Array;
+import com.eclipsesource.v8.utils.V8ObjectUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.util.FileCopyUtils;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class React {
 
-    private ThreadLocal<NashornScriptEngine> engineHolder = new ThreadLocal<NashornScriptEngine>() {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    private ThreadLocal<V8> engineHolder = new ThreadLocal<V8>() {
         @Override
-        protected NashornScriptEngine initialValue() {
-            NashornScriptEngine nashornScriptEngine = (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
+        protected V8 initialValue() {
             try {
-                nashornScriptEngine.eval(read("static/nashorn-polyfill.js"));
-                nashornScriptEngine.eval(read("static/vendor/react.js"));
-                nashornScriptEngine.eval(read("static/vendor/showdown.min.js"));
-                nashornScriptEngine.eval(read("static/commentBox.js"));
-            } catch (ScriptException e) {
-                throw new RuntimeException(e);
+                V8 v8 = V8.createV8Runtime("global");
+                v8.executeVoidScript(read("static/vendor/react.js"));
+                v8.executeVoidScript(read("static/vendor/showdown.min.js"));
+                v8.executeVoidScript(read("static/commentBox.js"));
+                return v8;
+            } catch(IOException e) {
+                throw new RuntimeException("Whatever", e);
             }
-            return nashornScriptEngine;
         }
     };
 
     public  String renderCommentBox(List<Comment> comments) {
         try {
-            Object html = engineHolder.get().invokeFunction("renderServer", comments);
-            return String.valueOf(html);
-        }
-        catch (Exception e) {
+            V8 v8 = engineHolder.get();
+
+            V8Array commentsArray = null;
+            V8Array parameters = null;
+            try {
+
+                List<Map> commentsMap = comments.stream()
+                        .map(comment -> objectMapper.convertValue(comment, Map.class))
+                        .collect(Collectors.toList());
+
+                commentsArray = V8ObjectUtils.toV8Array(v8, commentsMap);
+                parameters = new V8Array(v8).push(commentsArray);
+                return v8.executeStringFunction("renderServer", parameters);
+
+            } finally {
+                if (commentsArray != null) {
+                    commentsArray.release();
+                }
+                if (parameters != null) {
+                    parameters.release();
+                }
+            }
+
+        } catch (Exception e) {
             throw new IllegalStateException("failed to render react component", e);
         }
     }
 
-    private Reader read(String path) {
+    private String read(String path) throws IOException {
         InputStream in = getClass().getClassLoader().getResourceAsStream(path);
-        return new InputStreamReader(in);
+        return FileCopyUtils.copyToString(new InputStreamReader(in, UTF_8));
     }
 }
