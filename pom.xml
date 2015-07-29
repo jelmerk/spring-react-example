@@ -75,5 +75,39 @@
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>osx</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>com.eclipsesource.j2v8</groupId>
+					<artifactId>j2v8_macosx_x86_64</artifactId>
+					<version>3.0.0</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>linux</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<name>!mac os x</name>
+				</os>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>com.eclipsesource.j2v8</groupId>
+					<artifactId>j2v8_linux_x86_64</artifactId>
+					<version>3.0.0</version>
+				</dependency>
+			</dependencies>
+		</profile>
+
+	</profiles>
 
 </project>
